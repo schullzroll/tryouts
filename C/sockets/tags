@@ -1,0 +1,56 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+CC	makefile	/^CC = gcc$/;"	m
+CFLAGS	makefile	/^CFLAGS = -O0 -ggdb -Wall -Werror$/;"	m
+CLI_FUNCS	makefile	/^CLI_FUNCS = $/;"	m
+CLI_OBJS	makefile	/^CLI_OBJS = $(CLI_SRCS:.c=.o)$/;"	m
+CLI_PROGRAM	makefile	/^CLI_PROGRAM = cli$/;"	m
+CLI_SRC	makefile	/^CLI_SRC = cli.c$/;"	m
+CLI_SRCS	makefile	/^CLI_SRCS = $(CLI_FUNCS) $(CLI_SRC)$/;"	m
+CONN_SOCK_PATH	shared.h	14;"	d
+DAE_FUNCS	makefile	/^DAE_FUNCS = daef.c$/;"	m
+DAE_OBJS	makefile	/^DAE_OBJS = $(DAE_SRCS:.c=.o)$/;"	m
+DAE_PROGRAM	makefile	/^DAE_PROGRAM = dae$/;"	m
+DAE_SRC	makefile	/^DAE_SRC = dae.c$/;"	m
+DAE_SRCS	makefile	/^DAE_SRCS = $(DAE_SRC) $(DAE_FUNCS)$/;"	m
+HEADERS	makefile	/^HEADERS = shared.h                        $/;"	m
+MAX_MSGLEN	shared.h	16;"	d
+MAX_NCLIENTS	shared.h	15;"	d
+OBJS	makefile	/^OBJS = $(DAE_OBJS) $(CLI_OBJS)$/;"	m
+PROGRAMS	makefile	/^PROGRAMS = $(CLI_PROGRAM) $(DAE_PROGRAM)$/;"	m
+_cmd	shared.h	/^struct _cmd { $/;"	s
+_socket_defaults	shared.h	/^struct _socket_defaults {$/;"	s
+_unix_sockaddr	shared.h	/^struct _unix_sockaddr {$/;"	s
+att	daef.c	/^cmdList( att(unused) char **args){$/;"	f
+att	shared.h	12;"	d
+bool	shared.h	/^typedef char bool;$/;"	t
+cmd	shared.h	/^typedef struct _cmd cmd;$/;"	t	typeref:struct:_cmd
+cmdAdd	daef.c	/^cmdAdd(char **args){$/;"	f
+cmdAddPush	daef.c	/^cmdAddPush(const char* name){$/;"	f
+cmdhandler	shared.h	/^typedef int (*cmdhandler) (char**);$/;"	t
+commands	daef.c	/^cmd commands[] = {$/;"	v
+domain	shared.h	/^    int domain;$/;"	m	struct:_socket_defaults
+executeCmdl	daef.c	/^executeCmdl(char **tokenatedcmdl){$/;"	f
+false	shared.h	20;"	d
+freeNames	daef.c	/^freeNames(){$/;"	f
+getHandler	daef.c	/^getHandler(const char* potcmd){$/;"	f
+handler	shared.h	/^    cmdhandler handler;    \/* pointer to function specific to the cmd entered *\/$/;"	m	struct:_cmd
+help	shared.h	/^    const char *help;      \/* info for how the command is used *\/$/;"	m	struct:_cmd
+main	cli.c	/^int main(int argc, char** argv){$/;"	f
+main	dae.c	/^int main(int argc, char** argv){$/;"	f
+names	daef.c	/^char **names;$/;"	v
+nnames	daef.c	/^size_t nnames = 0;$/;"	v
+noargs	daef.c	/^noargs(char **args){$/;"	f
+protocol	shared.h	/^    int protocol;$/;"	m	struct:_socket_defaults
+sa_family	shared.h	/^    sa_family_t sa_family; \/* AF_UNIX or AF_LOCAL *\/$/;"	m	struct:_unix_sockaddr
+sa_path	shared.h	/^    char sa_path[255];     \/* path to socket file *\/$/;"	m	struct:_unix_sockaddr
+socket_defaults	shared.h	/^typedef struct _socket_defaults socket_defaults;$/;"	t	typeref:struct:_socket_defaults
+strrep	shared.h	/^    const char *strrep;    \/* string representation of command *\/$/;"	m	struct:_cmd
+tokenate	daef.c	/^tokenate(const char *cmdl){$/;"	f
+true	shared.h	19;"	d
+type	shared.h	/^    int type;$/;"	m	struct:_socket_defaults
+unix_sockaddr	shared.h	/^typedef struct _unix_sockaddr unix_sockaddr;$/;"	t	typeref:struct:_unix_sockaddr

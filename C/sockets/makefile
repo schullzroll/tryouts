@@ -1,16 +1,22 @@
 # executables names
-DAE_PROGRAM = cli
-CLI_PROGRAM = dae
+DAE_PROGRAM = dae
+CLI_PROGRAM = cli
+PROGRAMS = $(CLI_PROGRAM) $(DAE_PROGRAM)
 
 # name of main source(the one with main func) for client
 CLI_SRC = cli.c
 CLI_FUNCS = 
+CLI_SRCS = $(CLI_FUNCS) $(CLI_SRC)
+CLI_OBJS = $(CLI_SRCS:.c=.o)
+
 DAE_SRC = dae.c
 DAE_FUNCS = daef.c
+DAE_SRCS = $(DAE_SRC) $(DAE_FUNCS)
+DAE_OBJS = $(DAE_SRCS:.c=.o)
 # shared headers for all PROGRAMs
 HEADERS = shared.h                        
+OBJS = $(DAE_OBJS) $(CLI_OBJS)
 
-SRCS = $(DAE_SRCS) $(CLI_SRCS)
 # compiler used
 CC = gcc
 # compiler flags
@@ -21,16 +27,15 @@ CFLAGS = -O0 -ggdb -Wall -Werror
 
 .PHONY: all clean cls
 #====NO TOUCHIE TOUCHIE BELOW THIS LINE====#
-OBJS = $(SRCS:.c=.o)
 
 all: $(DAE_PROGRAM) $(CLI_PROGRAM)
-
-$DAE_PROGRAM: $(DAE_SRC) $(DAE_FUNCS)
-	$(CC) $^ -o $@ 
-
-$CLI_PROGRAM: $(CLI_SRC) $(CLI_FUNCS)
-	$(CC) $^ -o $@ 
 	
+$(DAE_PROGRAM): $(DAE_OBJS)
+	$(CC) $(CFLAGS) $^ -o $@
+
+$(CLI_PROGRAM): $(CLI_OBJS)
+	$(CC) $(CFLAGS) $^ -o $@
+
 # cleaning
 clean cls:
-	rm -f $(PROGRAMS) $()
+	rm -f $(PROGRAMS) $(OBJS)

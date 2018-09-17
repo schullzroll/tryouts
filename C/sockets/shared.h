@@ -41,5 +41,9 @@ struct _cmd {
     cmdhandler handler;    /* pointer to function specific to the cmd entered */
 };
 
+
+int cmdList(char **args);
+int executeCmdl(char **tokenatedcmdl);
+void freeNames();
 size_t noargs(char **args);
 char ** tokenate(const char *cmdl);

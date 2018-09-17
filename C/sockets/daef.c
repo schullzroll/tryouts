@@ -1,5 +1,52 @@
-static int
-addname(const char* name){
+#include "shared.h"
+
+char **names;
+size_t nnames = 0;
+
+int cmdAdd(char **args);
+int cmdList(char **args);
+
+cmd commands[] = {
+    {.strrep = "add",
+     .help = "$ add <name>",
+     .handler = cmdAdd,
+    },
+    {.strrep = "list",
+     .help = "$ list",
+     .handler = cmdList,
+    },
+
+    /* last strrep must always be NULL */
+    {.strrep = NULL}
+};
+
+void
+freeNames(){
+    /* free up stuff from test region */
+    for (size_t i = 0; i < nnames; i++) {
+        free(names[i]);
+    }
+    free(names);
+    return;
+}
+
+/* extracts cmd appropriate for given potential cmd */
+void *
+getHandler(const char* potcmd){
+    cmd *cmditerator = commands;
+    while (cmditerator->strrep) {
+        if (!strncmp(potcmd, cmditerator->strrep, strlen(cmditerator->strrep))) {
+            return cmditerator;
+        }
+
+        cmditerator++;
+    }
+    
+    return NULL;
+}
+
+int
+cmdAddPush(const char* name){
     if (!name) {
         return -1;
     }
@@ -11,7 +58,7 @@ addname(const char* name){
 
     /* allocate space for last name to be copied to */
     char *newnamepos = namescp[nnames];
-    newnamepos = realloc(newnamepos, strlen(name) * sizeof(**namescp));
+    newnamepos = realloc(newnamepos, (strlen(name) + 1) * sizeof(**namescp));
     if (!newnamepos) {
         return -1;
     }
@@ -26,9 +73,9 @@ addname(const char* name){
 }
 
 int
-add(char **args){
+cmdAdd(char **args){
     while(args){
-        if (addname(*args) < 0) {
+        if (cmdAddPush(*args) < 0) {
             return -1;    
         }
         args++;
@@ -47,7 +94,7 @@ noargs(char **args){
 }
 
 int
-list( att(unused) char **args){
+cmdList( att(unused) char **args){
     for (size_t i = 0; i < nnames; i++){
         printf("[%zu] \'%s\'\n", i, names[i]);
     }
@@ -55,16 +102,22 @@ list( att(unused) char **args){
     return 0; 
 }
 
-
-
 /*known ISSUE, when passing string of strlen = 40, it adds 'Q' to the end of last token
  for now it doesnt seem that bad bud it is still a BUG */
+
+/*  tokenate()
+ *  Transform command line buffer from client to 2D array of individual 'words'(tokens).
+ *  This function doesn't test whether the given buffer is a valid command.
+ *
+ *  On sucessfull separation returns pointer to first 'word'(token), otherwise NULL
+ */
 char **
 tokenate(const char *cmdl){
-    char *cmdlcopy = malloc(sizeof(*cmdl) * strlen(cmdl)); 
+    char *cmdlcopy = malloc(sizeof(*cmdl) * (strlen(cmdl) + 1)); 
     if (!cmdlcopy) {
         return NULL;
     }
+    cmdlcopy[strlen(cmdl)] = '\0';
     strcpy(cmdlcopy, cmdl);
 
     const char separators[] = " \r\t";
@@ -103,4 +156,33 @@ tokenate(const char *cmdl){
         free(tokenatedcmdl);
         
     return NULL;
+}
+
+/*  executeCmdl()
+ *  Parses command handler out of tokenated cmdline and performs the execution
+ *  of given command.
+ *
+ *  When successfully parsed command line and found handler, return value of
+ *  handler function, otherwise negative value.
+ */
+int
+executeCmdl(char **tokenatedcmdl){
+    cmd *command; 
+
+    if (!tokenatedcmdl){
+        return -1; 
+    }
+
+    if (!*tokenatedcmdl){
+        return -1;
+    }
+
+    if (!(command = (cmd*) getHandler(*tokenatedcmdl))){
+        printf("%s> unknown command \'%s\'!\n", "dae", *tokenatedcmdl); 
+        return -1;
+    }
+
+    char **args = tokenatedcmdl + 1;
+
+    return command->handler(args);
 }
