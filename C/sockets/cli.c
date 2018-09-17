@@ -7,7 +7,7 @@ int main(int argc, char** argv){
     int sfd;                /* socket file descriptor */
     char msg[MAX_MSGLEN];   /* message sent between processes */
 
-    unix_sockaddr endpoint;
+    unix_sockaddr endpoint; /* socket address to which clients connect */
     /* "default" */
     const socket_defaults defS = {
         .domain = AF_UNIX,
@@ -15,7 +15,7 @@ int main(int argc, char** argv){
         .protocol = 0
     };
 
-    /* connecting to shared socket */
+    /* create clients socket */
     sfd = socket(defS.domain, defS.type, defS.protocol);
     if (sfd == -1) {
         perror("socket error");
