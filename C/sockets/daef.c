@@ -20,6 +20,28 @@ cmd commands[] = {
     {.strrep = NULL}
 };
 
+char*
+getArgs(char **tokenizedcmdl){
+    if (!tokenizedcmdl){
+        return NULL; 
+    }        
+    char **tokcmdlcopy = tokenizedcmdl + 1;
+    char* args = NULL;
+
+    while (tokcmdlcopy) {
+        args = realloc(args, (strlen(*tokcmdlcopy) + (args) ? strlen(args) + 1: 1));    
+        if (!args){
+            return NULL;
+        }
+        args[strlen(args)] = '\0';
+        strcat(args, *tokcmdlcopy);
+
+        tokcmdlcopy++;
+    }
+
+    return args;
+}
+
 void
 freeNames(){
     /* free up stuff from test region */

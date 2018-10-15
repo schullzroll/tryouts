@@ -5,7 +5,7 @@
 int main(int argc, char** argv){
 
     int sfd;                /* socket file descriptor */
-    char msg[MAX_MSGLEN];   /* message sent between processes */
+    char buffer[MAX_BUFFLEN];   /* message sent between processes */
 
     unix_sockaddr endpoint; /* socket address to which clients connect */
     /* "default" */
@@ -32,32 +32,27 @@ int main(int argc, char** argv){
     }
     printf("connected\n");
     
-    printf("cli> ready to send message\n");
-    printf("msg: ");
-    scanf("%s", msg);
+    printf("cli> ready to send command\n");
+    printf("$ ");
+    fgets(buffer, sizeof(buffer), stdin);
     while(!feof(stdin)){
-        printf("cli> sending message \'%s\'...\n", msg);
-        if (send(sfd, msg, strlen(msg), 0) < -1) {
+        /* strip newline char from buffer 
+         * - needs to add else{} branch for when buffer is overrun */
+        char* nlpos = strchr(buffer, '\n');
+        if (nlpos){
+            *nlpos = '\0';
+        }
+
+        printf("cli> sending command \'%s\'...\n", buffer);
+        if (send(sfd, buffer, sizeof(buffer), 0) < -1) {
             perror("send error");
             exit(-1);
         }
-        printf("message sent\n");
-        printf("cli> waiting for reply...\n");
+        printf("command sent\n");
 
-        int nbytes = recv(sfd, msg, MAX_MSGLEN, 0);
-        if (nbytes > 0) {
-            printf("received message \'%s\'\n", msg);
-        }
-        else {
-            if (nbytes < 0) perror("recv error");
-            printf("dae closed connection\n");
-            printf("cli> exiting process\n");
-            exit(0);
-        }
-
-        printf("msg: ");
-        memset(msg, 0, strlen(msg));
-        scanf("%s", msg);
+        printf("$ ");
+        memset(buffer, 0, sizeof(buffer));
+        fgets(buffer, sizeof(buffer), stdin);
     }
 
     close(sfd); 

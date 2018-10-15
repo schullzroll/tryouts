@@ -6,7 +6,8 @@ int main(int argc, char** argv){
     bool done;
     int sfd;                /* socket file descriptor */
     int cfd;                /* client file descriptor */
-    char msg[MAX_MSGLEN];   /* message sent between processes */
+    char buffer[MAX_BUFFLEN];   /* message sent between processes */
+    char **tokenatedcmdl;
 
     unix_sockaddr local,    /*  */
                   endpoint; /*  */
@@ -17,24 +18,6 @@ int main(int argc, char** argv){
         .type = SOCK_STREAM,
         .protocol = 0
     };
-
-    /* test region */
-    const char cmdline[] = {"add list fives fives fives fives fives e"};
-    char **tokenatedcmdl;
-
-    printf("len: %zu\n", strlen(cmdline));
-
-    if (!(tokenatedcmdl = tokenate(cmdline))){
-        return -1;
-    }
-
-    executeCmdl(tokenatedcmdl);
-
-    cmdList(tokenatedcmdl + 1);
-
-    printf("number of args= %zu\n", noargs(tokenatedcmdl + 1));
-
-    freeNames();
 
     /* creating socket through which connections are established  */
     sfd = socket(defS.domain, defS.type, defS.protocol);
@@ -83,9 +66,9 @@ int main(int argc, char** argv){
        do {
            /* recieve a message (wait for message)
               - equivalent to read(), when flags are set to 0 */
-           printf("dae> waiting for message from client...\n");
-           memset(msg, 0, strlen(msg));
-           int nbytes = recv(cfd, msg, MAX_MSGLEN, 0);
+           printf("dae> waiting for command from client...\n");
+           memset(buffer, 0, sizeof(buffer));
+           int nbytes = recv(cfd, buffer, sizeof(buffer), 0);
            done = false;
            /* check number of received bytes, 0 bytes can be validly received as EOF when peer closed */
            if (nbytes <= 0) {
@@ -93,19 +76,17 @@ int main(int argc, char** argv){
                printf("dae> received EOF\n");
                done = true;
            }
-           /* printing received message */
-           if (!done) {
-               printf("received message \'%s\'\n", msg);
-           }
 
-           /* send message back when received a msg*/
+           /* parse clients cmdline and execute specified command */
            if (!done) {
-               printf("dae> sending message \'%s\' back...\n", msg);
-               if (send(cfd, msg, nbytes, 0) < 0) {
-                   perror("send error");               
-                   done = true;
+               if (!(tokenatedcmdl = tokenate(buffer))){
+                   printf("tokenizing error\n");  
                }
-               printf("message sent\n");
+               else{
+                   printf("received command \'%s\'\n"
+                          , buffer);
+                   executeCmdl(tokenatedcmdl);
+               }
            }
        } while(!done);
 
@@ -114,5 +95,6 @@ int main(int argc, char** argv){
        close(cfd);
     }
 
+    freeNames();
     return 0;
 }

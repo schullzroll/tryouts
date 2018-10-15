@@ -30,11 +30,11 @@ CFLAGS = -O0 -ggdb -Wall -Werror
 
 all: $(DAE_PROGRAM) $(CLI_PROGRAM)
 	
-$(DAE_PROGRAM): $(DAE_OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
+$(DAE_PROGRAM): $(DAE_OBJS) $(HEADERS)
+	$(CC) $(CFLAGS) $(DAE_OBJS) -o $@
 
-$(CLI_PROGRAM): $(CLI_OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
+$(CLI_PROGRAM): $(CLI_OBJS) $(HEADERS)
+	$(CC) $(CFLAGS) $(CLI_OBJS) -o $@
 
 # cleaning
 clean cls:

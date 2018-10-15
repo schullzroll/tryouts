@@ -13,7 +13,8 @@
 
 #define CONN_SOCK_PATH  "./connsocket"
 #define MAX_NCLIENTS    1
-#define MAX_MSGLEN      255
+/* TODO fix for buffer overflow */
+#define MAX_BUFFLEN     80
 
 typedef char bool;
 #define true            1
@@ -42,7 +43,7 @@ struct _cmd {
 };
 
 
-int cmdList(char **args);
+char *getArgs(char **tokenizedcmdl);
 int executeCmdl(char **tokenatedcmdl);
 void freeNames();
 size_t noargs(char **args);
