@@ -18,7 +18,7 @@ DAE_PROGRAM	makefile	/^DAE_PROGRAM = dae$/;"	m
 DAE_SRC	makefile	/^DAE_SRC = dae.c$/;"	m
 DAE_SRCS	makefile	/^DAE_SRCS = $(DAE_SRC) $(DAE_FUNCS)$/;"	m
 HEADERS	makefile	/^HEADERS = shared.h                        $/;"	m
-MAX_MSGLEN	shared.h	16;"	d
+MAX_BUFFLEN	shared.h	16;"	d
 MAX_NCLIENTS	shared.h	15;"	d
 OBJS	makefile	/^OBJS = $(DAE_OBJS) $(CLI_OBJS)$/;"	m
 PROGRAMS	makefile	/^PROGRAMS = $(CLI_PROGRAM) $(DAE_PROGRAM)$/;"	m
@@ -37,6 +37,7 @@ domain	shared.h	/^    int domain;$/;"	m	struct:_socket_defaults
 executeCmdl	daef.c	/^executeCmdl(char **tokenatedcmdl){$/;"	f
 false	shared.h	20;"	d
 freeNames	daef.c	/^freeNames(){$/;"	f
+getArgs	daef.c	/^getArgs(char **tokenizedcmdl){$/;"	f
 getHandler	daef.c	/^getHandler(const char* potcmd){$/;"	f
 handler	shared.h	/^    cmdhandler handler;    \/* pointer to function specific to the cmd entered *\/$/;"	m	struct:_cmd
 help	shared.h	/^    const char *help;      \/* info for how the command is used *\/$/;"	m	struct:_cmd
