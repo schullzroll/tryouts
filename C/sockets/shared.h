@@ -43,9 +43,23 @@ struct _cmd {
     cmdhandler handler;    /* pointer to function specific to the cmd entered */
 };
 
-
+/* socket stuff */
 int create_socket(socket_settings sset);
 socklen_t init_remlink(socket_settings sset, unix_sockaddr* remlink);
+
+int setup_daemon(socket_settings sset,
+                 int *lsfd,
+                 unix_sockaddr *remlink,
+                 socklen_t *addrlen,
+                 int maxclients,
+                 bool verbose);
+
+int 
+setup_client(socket_settings sset,
+             int *lsfd,
+             unix_sockaddr *remlink,
+             socklen_t *addrlen,
+             bool verbose);
 
 char *getArgs(char **tokenizedcmdl);
 int executeCmdl(char **tokenatedcmdl);

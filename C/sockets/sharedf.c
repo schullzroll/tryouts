@@ -2,10 +2,13 @@
 
 int
 create_socket(socket_settings sset){
-    /* create clients socket */
-    int rsfd = socket(sset.domain, sset.type, sset.protocol);
+    /* create socket file descriptor */
+    int sfd = socket(sset.domain, sset.type, sset.protocol);
+    if (sfd < 0){
+        perror("socket error");
+    }
 
-    return rsfd;
+    return sfd;
 }
 
 socklen_t

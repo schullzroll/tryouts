@@ -5,7 +5,7 @@ PROGRAMS = $(CLI_PROGRAM) $(DAE_PROGRAM)
 
 # name of main source(the one with main func) for client
 CLI_SRC = cli.c
-CLI_FUNCS = 
+CLI_FUNCS = clif.c
 CLI_SRCS = $(CLI_FUNCS) $(CLI_SRC)
 CLI_OBJS = $(CLI_SRCS:.c=.o)
 

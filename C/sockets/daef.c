@@ -3,8 +3,8 @@
 char **names;
 size_t nnames = 0;
 
-int cmdAdd(char **args);
-int cmdList(char **args);
+static int cmdAdd(char **args);
+static int cmdList(char **args);
 
 cmd commands[] = {
     {.strrep = "add",
@@ -20,6 +20,7 @@ cmd commands[] = {
     {.strrep = NULL}
 };
 
+//TODO
 char*
 getArgs(char **tokenizedcmdl){
     if (!tokenizedcmdl){
@@ -67,7 +68,7 @@ getHandler(const char* potcmd){
     return NULL;
 }
 
-int
+static int
 cmdAddPush(const char* name){
     if (!name) {
         return -1;
@@ -94,7 +95,7 @@ cmdAddPush(const char* name){
     return 0;
 }
 
-int
+static int
 cmdAdd(char **args){
     while(args){
         if (cmdAddPush(*args) < 0) {
@@ -115,7 +116,7 @@ noargs(char **args){
     return n;
 }
 
-int
+static int
 cmdList( att(unused) char **args){
     for (size_t i = 0; i < nnames; i++){
         printf("[%zu] \'%s\'\n", i, names[i]);
@@ -207,4 +208,60 @@ executeCmdl(char **tokenatedcmdl){
     char **args = tokenatedcmdl + 1;
 
     return command->handler(args);
+}
+
+static int
+bind_socket(int lsfd, unix_sockaddr remlink, socklen_t addrlen, bool verbose){
+    int retval;
+
+    /* bind local socket to remote socket*/
+    if (verbose) printf("dae> binding socket...\n");
+
+    if ((retval = bind(lsfd, (const struct sockaddr*) &remlink, addrlen)) < 0) {
+        perror("bind error");
+        return retval;
+    }
+
+    if (verbose) printf("dae> socket binded\n");
+
+    return 0;
+}
+             
+static int
+open_socket(int lsfd, unix_sockaddr remlink, int maxclients, bool verbose){
+    int retval;
+
+    /* listen for cojnections on remlink */
+    if (verbose) printf("dae> opening remote link for listening...\n");
+
+    if ((retval = listen(lsfd, maxclients)) < 0) {
+        perror("listen error");        
+        return retval;
+    }
+    if (verbose) printf("dae> remote opened\n");
+
+    return 0;
+}
+
+int
+setup_daemon(socket_settings sset,
+             int *lsfd,
+             unix_sockaddr *remlink,
+             socklen_t *addrlen,
+             int maxclients,
+             bool verbose){
+
+    int retval;
+
+    *lsfd = create_socket(sset);
+    *addrlen = init_remlink(sset, remlink);
+
+    /* remove file if exists & delete after use */
+    if ((retval = unlink(remlink->sa_path)) < 0) return retval;
+    /* bind local socket to remote socket to redirect communication to local */
+    if ((retval = bind_socket(*lsfd, *remlink, *addrlen, verbose)) < 0) return retval;
+    /* open socket as ready for incoming connections */ 
+    if ((retval = open_socket(*lsfd, *remlink, maxclients, verbose)) < 0) return retval;
+
+    return 0;
 }

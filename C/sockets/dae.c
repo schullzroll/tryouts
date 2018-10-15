@@ -3,13 +3,13 @@
 
 int main(int argc, char** argv){
 
+    char buffer[MAX_BUFFLEN];   /* message sent between processes */
+    char **tokenatedcmdl;       /* cmdl divided into tokens (words) */
+    unix_sockaddr remlink;      /* link to remote socket file */
+    socklen_t addrlen;
     bool done;
     int lsfd;                   /* local socket file descriptor */
     int csfd;                   /* client socket file descriptor */
-    char buffer[MAX_BUFFLEN];   /* message sent between processes */
-    char **tokenatedcmdl;       /* cmdl divided into tokens (words) */
-
-    unix_sockaddr remlink;      /* link to remote socket file */
 
     const socket_settings sset = {
         .domain = AF_UNIX,
@@ -18,29 +18,8 @@ int main(int argc, char** argv){
         .remote_path = CONN_SOCK_PATH
     };
 
-    /* create local socket */
-    lsfd = create_socket(sset);
-
-    /* create remote identifier(link) to bind to it later */
-    socklen_t addrlen = init_remlink(sset, &remlink);
-
-    /* remove file if exists */
-    unlink(remlink.sa_path);
-    /* bind local socket to remote socket*/
-    printf("dae> binding socket...\n");
-    if (bind(lsfd, (const struct sockaddr*)&remlink, addrlen) == -1) {
-        perror("bind error");
-        exit(-1);
-    }
-    printf("socket binded\n");
-    
-    /* listen for cojnections on remlink */
-    printf("dae> opening lsfd for incoming connections...\n");
-    if (listen(lsfd, MAX_NCLIENTS) == -1) {
-        perror("listen error");        
-        exit(-1);
-    }
-    printf("lsfd opened\n");
+    if (setup_daemon(sset, &lsfd, &remlink, &addrlen, MAX_NCLIENTS, true) < 0)
+        return -1;     
 
     /* main event loop */
     while(1) {

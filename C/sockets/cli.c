@@ -4,10 +4,10 @@
 
 int main(int argc, char** argv){
 
-    int lsfd;                   /* local socket file descriptor */
     char buffer[MAX_BUFFLEN];   /* message sent between processes */
-
     unix_sockaddr remlink;      /* link to remote socket file */
+    socklen_t addrlen;
+    int lsfd;                   /* local socket file descriptor */
 
     const socket_settings sset = {
         .domain = AF_UNIX,
@@ -16,20 +16,9 @@ int main(int argc, char** argv){
         .remote_path = CONN_SOCK_PATH
     };
 
-    /* create clients socket */
-    lsfd = create_socket(sset);
-
-    /* create remote identifier(link) to connect to it later */
-    socklen_t addrlen = init_remlink(sset, &remlink);
-
-    /* connect to "daemon" */
-    printf("cli> connecting to socket...\n");
-    if (connect(lsfd, (const struct sockaddr*)&remlink, addrlen) == -1){
-        perror("connect error");
-        exit(-1);
-    }
-    printf("connected\n");
-    
+    if (setup_client(sset, &lsfd, &remlink, &addrlen, true) < 0)
+        return -1;
+   
     printf("cli> ready to send command\n");
     printf("$ ");
     fgets(buffer, sizeof(buffer), stdin);
