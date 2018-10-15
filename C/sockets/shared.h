@@ -26,11 +26,12 @@ struct _unix_sockaddr {
     char sa_path[255];     /* path to socket file */
 };
 
-typedef struct _socket_defaults socket_defaults;
-struct _socket_defaults {
+typedef struct _socket_settings socket_settings;
+struct _socket_settings {
     int domain;
     int type;
     int protocol;
+    char remote_path[255];
 };
 
 /* char** as arguments to functions need to have NULL array block at the end */
@@ -42,6 +43,9 @@ struct _cmd {
     cmdhandler handler;    /* pointer to function specific to the cmd entered */
 };
 
+
+int create_socket(socket_settings sset);
+socklen_t init_remlink(socket_settings sset, unix_sockaddr* remlink);
 
 char *getArgs(char **tokenizedcmdl);
 int executeCmdl(char **tokenatedcmdl);

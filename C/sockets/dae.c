@@ -4,58 +4,51 @@
 int main(int argc, char** argv){
 
     bool done;
-    int sfd;                /* socket file descriptor */
-    int cfd;                /* client file descriptor */
+    int lsfd;                   /* local socket file descriptor */
+    int csfd;                   /* client socket file descriptor */
     char buffer[MAX_BUFFLEN];   /* message sent between processes */
-    char **tokenatedcmdl;
+    char **tokenatedcmdl;       /* cmdl divided into tokens (words) */
 
-    unix_sockaddr local,    /*  */
-                  endpoint; /*  */
+    unix_sockaddr remlink;      /* link to remote socket file */
 
-    /* "default" */
-    const socket_defaults defS = {
+    const socket_settings sset = {
         .domain = AF_UNIX,
         .type = SOCK_STREAM,
-        .protocol = 0
+        .protocol = 0,
+        .remote_path = CONN_SOCK_PATH
     };
 
-    /* creating socket through which connections are established  */
-    sfd = socket(defS.domain, defS.type, defS.protocol);
-    if (sfd == -1) {
-        perror("socket error");
-        exit(-1);
-    }
+    /* create local socket */
+    lsfd = create_socket(sset);
 
-    /* setup local socket to bind to sfd */
-    local.sa_family = defS.domain;
-    strcpy(local.sa_path, CONN_SOCK_PATH);
+    /* create remote identifier(link) to bind to it later */
+    socklen_t addrlen = init_remlink(sset, &remlink);
 
     /* remove file if exists */
-    unlink(local.sa_path);
-    /* bind local to sfd */
-    socklen_t len = sizeof(local.sa_family) + strlen(local.sa_path);
+    unlink(remlink.sa_path);
+    /* bind local socket to remote socket*/
     printf("dae> binding socket...\n");
-    if (bind(sfd, (struct sockaddr*)&local, len) == -1) {
+    if (bind(lsfd, (const struct sockaddr*)&remlink, addrlen) == -1) {
         perror("bind error");
         exit(-1);
     }
     printf("socket binded\n");
     
-    /* open sfd to listen for connections */
-    printf("dae> opening sfd for incoming connections...\n");
-    if (listen(sfd, MAX_NCLIENTS) == -1) {
+    /* listen for cojnections on remlink */
+    printf("dae> opening lsfd for incoming connections...\n");
+    if (listen(lsfd, MAX_NCLIENTS) == -1) {
         perror("listen error");        
         exit(-1);
     }
-    printf("sfd opened\n");
+    printf("lsfd opened\n");
 
     /* main event loop */
     while(1) {
-        len = sizeof(endpoint);
+        addrlen = sizeof(remlink) + strlen(remlink.sa_path);
         printf("dae> waiting for clients to connect...\n");
         /* accept client connections (wait for clients to connect) */
-        cfd = accept(sfd, (struct sockaddr *)&endpoint, &len);
-        if (cfd < 0) {
+        csfd = accept(lsfd, (struct sockaddr *)&remlink, &addrlen);
+        if (csfd < 0) {
             perror("accept error");
             exit(-1);
         }
@@ -68,7 +61,7 @@ int main(int argc, char** argv){
               - equivalent to read(), when flags are set to 0 */
            printf("dae> waiting for command from client...\n");
            memset(buffer, 0, sizeof(buffer));
-           int nbytes = recv(cfd, buffer, sizeof(buffer), 0);
+           int nbytes = recv(csfd, buffer, sizeof(buffer), 0);
            done = false;
            /* check number of received bytes, 0 bytes can be validly received as EOF when peer closed */
            if (nbytes <= 0) {
@@ -92,9 +85,10 @@ int main(int argc, char** argv){
 
        /* closing client */
        printf("dae> closing clients session!\n");
-       close(cfd);
+       close(csfd);
     }
 
+    close(lsfd);
     freeNames();
     return 0;
 }

@@ -15,7 +15,9 @@ DAE_SRCS = $(DAE_SRC) $(DAE_FUNCS)
 DAE_OBJS = $(DAE_SRCS:.c=.o)
 # shared headers for all PROGRAMs
 HEADERS = shared.h                        
-OBJS = $(DAE_OBJS) $(CLI_OBJS)
+FUNCS = sharedf.c
+SHARED_OBJS = $(FUNCS:.c=.o)
+OBJS = $(DAE_OBJS) $(CLI_OBJS) $(SHARED_OBJS)
 
 # compiler used
 CC = gcc
@@ -28,13 +30,13 @@ CFLAGS = -O0 -ggdb -Wall -Werror
 .PHONY: all clean cls
 #====NO TOUCHIE TOUCHIE BELOW THIS LINE====#
 
-all: $(DAE_PROGRAM) $(CLI_PROGRAM)
+all: $(PROGRAMS)
 	
-$(DAE_PROGRAM): $(DAE_OBJS) $(HEADERS)
-	$(CC) $(CFLAGS) $(DAE_OBJS) -o $@
+$(DAE_PROGRAM): $(DAE_OBJS) $(SHARED_OBJS) $(HEADERS) 
+	$(CC) $(CFLAGS) $(DAE_OBJS) $(SHARED_OBJS) -o $@
 
-$(CLI_PROGRAM): $(CLI_OBJS) $(HEADERS)
-	$(CC) $(CFLAGS) $(CLI_OBJS) -o $@
+$(CLI_PROGRAM): $(CLI_OBJS) $(SHARED_OBJS) $(HEADERS)
+	$(CC) $(CFLAGS) $(CLI_OBJS) $(SHARED_OBJS) -o $@
 
 # cleaning
 clean cls:

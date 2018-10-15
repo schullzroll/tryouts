@@ -4,29 +4,27 @@
 
 int main(int argc, char** argv){
 
-    int sfd;                /* socket file descriptor */
+    int lsfd;                   /* local socket file descriptor */
     char buffer[MAX_BUFFLEN];   /* message sent between processes */
 
-    unix_sockaddr endpoint; /* socket address to which clients connect */
-    /* "default" */
-    const socket_defaults defS = {
+    unix_sockaddr remlink;      /* link to remote socket file */
+
+    const socket_settings sset = {
         .domain = AF_UNIX,
         .type = SOCK_STREAM,
-        .protocol = 0
+        .protocol = 0,
+        .remote_path = CONN_SOCK_PATH
     };
 
     /* create clients socket */
-    sfd = socket(defS.domain, defS.type, defS.protocol);
-    if (sfd == -1) {
-        perror("socket error");
-    }
+    lsfd = create_socket(sset);
+
+    /* create remote identifier(link) to connect to it later */
+    socklen_t addrlen = init_remlink(sset, &remlink);
 
     /* connect to "daemon" */
-    endpoint.sa_family = defS.domain;
-    strcpy(endpoint.sa_path, CONN_SOCK_PATH);
-    int len = sizeof(endpoint.sa_family) + strlen(endpoint.sa_path);
     printf("cli> connecting to socket...\n");
-    if (connect(sfd, (struct sockaddr*)&endpoint, len) == -1){
+    if (connect(lsfd, (const struct sockaddr*)&remlink, addrlen) == -1){
         perror("connect error");
         exit(-1);
     }
@@ -44,7 +42,7 @@ int main(int argc, char** argv){
         }
 
         printf("cli> sending command \'%s\'...\n", buffer);
-        if (send(sfd, buffer, sizeof(buffer), 0) < -1) {
+        if (send(lsfd, buffer, sizeof(buffer), 0) < -1) {
             perror("send error");
             exit(-1);
         }
@@ -55,7 +53,7 @@ int main(int argc, char** argv){
         fgets(buffer, sizeof(buffer), stdin);
     }
 
-    close(sfd); 
+    close(lsfd); 
 
     return 0;
 }
