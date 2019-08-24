@@ -3,7 +3,8 @@
 
 int main(int argc, char** argv){
 
-    char buffer[MAX_BUFFLEN];   /* message sent between processes */
+    char *buffer;   /* message sent between processes */
+    size_t buffsize = CMDL_LEN;
     char **tokenatedcmdl;       /* cmdl divided into tokens (words) */
     unix_sockaddr remlink;      /* link to remote socket file */
     socklen_t addrlen;
@@ -18,7 +19,14 @@ int main(int argc, char** argv){
         .remote_path = CONN_SOCK_PATH
     };
 
-    if (setup_daemon(sset, &lsfd, &remlink, &addrlen, MAX_NCLIENTS, true) < 0)
+    // TODO thread pool setup, shared memory blocks, 
+    buffer = malloc(buffsize + 1);
+    if (!buffer) {
+        return -1;
+    }
+    buffer[buffsize + 1] = '\0';
+
+    if (setup_daemon(sset, &lsfd, &remlink, &addrlen, MAX_NCLIENTS, false) < 0)
         return -1;     
 
     /* main event loop */
@@ -39,8 +47,9 @@ int main(int argc, char** argv){
            /* recieve a message (wait for message)
               - equivalent to read(), when flags are set to 0 */
            printf("dae> waiting for command from client...\n");
-           memset(buffer, 0, sizeof(buffer));
-           int nbytes = recv(csfd, buffer, sizeof(buffer), 0);
+           memset(buffer, 0, buffsize);
+           buffer[buffsize + 1] = '\0';
+           int nbytes = recv(csfd, buffer, buffsize, 0);
            done = false;
            /* check number of received bytes, 0 bytes can be validly received as EOF when peer closed */
            if (nbytes <= 0) {

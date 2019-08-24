@@ -21,3 +21,27 @@ init_remlink(socket_settings sset, unix_sockaddr* remlink){
     return addrlen; 
 }
 
+char *
+rfgets(char **bufp, size_t *sizep, FILE *fp, size_t sizelimit, size_t jump, bool *toolong) { // get cmdl
+     size_t len;
+     *toolong = false;
+
+     if (fgets(*bufp, *sizep, fp) == NULL) return NULL;
+     len = sizeof(*bufp);
+     while(strchr(*bufp, '\n') == NULL) {
+         if (*sizep + jump > sizelimit){
+             printf("Line is too long!\n");
+             fflush(fp);
+             *toolong = true;
+             return NULL;
+         }
+         *sizep += jump;
+         *bufp = realloc(*bufp, *sizep);
+         if (!*bufp) return NULL; 
+         if(fgets(*bufp + len, *sizep - len, fp) == NULL) return *bufp;
+         len += sizeof(*bufp + len);
+     }
+ 
+     return *bufp;
+ }
+

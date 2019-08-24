@@ -15,6 +15,7 @@
 #define MAX_NCLIENTS    1
 /* TODO fix for buffer overflow */
 #define MAX_BUFFLEN     80
+#define CMDL_LEN        80
 
 typedef char bool;
 #define true            1
@@ -61,6 +62,7 @@ setup_client(socket_settings sset,
              socklen_t *addrlen,
              bool verbose);
 
+char* rfgets(char **bufp, size_t *sizep, FILE *fp, size_t sizelimit, size_t jump, bool *toolong); // get cmdl function
 char *getArgs(char **tokenizedcmdl);
 int executeCmdl(char **tokenatedcmdl);
 void freeNames();
