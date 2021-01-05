@@ -21,20 +21,28 @@ int main(int argc, char** argv){
     /* sets up client according to sset */
     if (setup_client(sset, &lsfd, &remlink, &addrlen, false) < 0)
         return -1;
-   
+
     printf("cli> ready to send command\n");
-    //fgets(buffer, sizeof(buffer), stdin);
+    buffer = malloc(sizeof(char) * buffsize);
+    //scanf("%s ", buffer);
     /* reads commandline and allocates buffer space */
-    
+
     /* ask for the cmdline multiple times if user entered in too long */
-    do {
-        toolong = false;
-        printf("$ ");
-        rfgets(&buffer, &buffsize, stdin, CMDL_LEN, 1, &toolong);
-    } while(toolong);
-        
+    // do {
+    //     toolong = false;
+    //     printf("$ ");
+    //     rfgets(&buffer, &buffsize, stdin, CMDL_LEN, 1, &toolong);
+    // } while(toolong);
+
     while(!feof(stdin)){
-        /* strip newline char from buffer 
+        memset(buffer, 0, buffsize);
+        do {
+            toolong = false;
+            printf("$ ");
+            rfgets(&buffer, &buffsize, stdin, CMDL_LEN, 1, &toolong);
+        } while(toolong);
+
+        /* strip newline char from buffer
          * - needs to add else{} branch for when buffer is overrun */
         char* nlpos = strchr(buffer, '\n');
         if (nlpos){
@@ -48,16 +56,9 @@ int main(int argc, char** argv){
         }
         printf("command sent\n");
 
-        printf("$ ");
-        memset(buffer, 0, buffsize);
-        do {
-            toolong = false;
-            printf("$ ");
-            rfgets(&buffer, &buffsize, stdin, CMDL_LEN, 1, &toolong);
-        } while(toolong);
     }
 
-    close(lsfd); 
+    close(lsfd);
 
     return 0;
 }
